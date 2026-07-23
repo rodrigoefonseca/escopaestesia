@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>ESCOPAESTESIA - o peso de ser útil</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; -webkit-user-select:none; }
+  html, body {
+    width:100%; height:100%;
+    background:#000;
+    overflow:hidden;
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+
+  .stage {
+    width:100vw;
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#000;
+  }
+
+  .phone {
+    position:relative;
+    width:100vw;
+    height:100vh;
+    max-width: calc(100vh * 941 / 1672);
+    max-height: calc(100vw * 1672 / 941);
+    aspect-ratio: 941 / 1672;
+    overflow:hidden;
+    background:#000;
+  }
+
+  .screen {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 0.4s ease;
+  }
+  .screen.active {
+    opacity:1;
+    pointer-events:auto;
+  }
+  .screen img {
+    width:100%;
+    height:100%;
+    display:block;
+    object-fit:cover;
+    pointer-events:none;
+  }
+
+  /* ---- Relógio na tela de bloqueio (horário de Brasília) ---- */
+  .clock-wrap {
+    position:absolute;
+    top:14%;
+    left:0;
+    width:100%;
+    text-align:center;
+    color:#fff;
+    pointer-events:none;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+  }
+  .clock-time {
+    font-size: 9.5vw;
+    font-weight:600;
+    letter-spacing:1px;
+    line-height:1;
+  }
+  .clock-date {
+    margin-top:2%;
+    font-size:3.4vw;
+    font-weight:400;
+    opacity:0.85;
+    text-transform:capitalize;
+  }
+
+  /* ---- Zona clicável "deslize para desbloquear" ---- */
+  .unlock-zone {
+    position:absolute;
+    left:0;
+    bottom:0%;
+    width:100%;
+    height:12%;
+    cursor:pointer;
+  }
+
+  /* ---- Zonas clicáveis dos ícones do menu ---- */
+  .app-zone {
+    position:absolute;
+    cursor:pointer;
+  }
+  /* linha 1: Sinopse | Elenco | Ficha Técnica | Encenador */
+  .row1 { top:58%; height:12%; }
+  .row1.c1 { left:6%;  width:23%; }
+  .row1.c2 { left:28%; width:22%; }
+  .row1.c3 { left:49%; width:22%; }
+  .row1.c4 { left:70%; width:24%; }
+  /* linha 2: Equipe Criativa | A CIA da ENT | Para você */
+  .row2 { top:71%; height:12%; }
+  .row2.c1 { left:13%; width:29%; }
+  .row2.c2 { left:37%; width:26%; }
+  .row2.c3 { left:57%; width:29%; }
+
+  /* ---- Botão Voltar (telas dos apps) ---- */
+  .back-btn {
+    position:absolute;
+    top:5%;
+    left:5%;
+    display:flex;
+    align-items:center;
+    gap:1.5%;
+    color:#fff;
+    font-size:3.6vw;
+    font-weight:600;
+    cursor:pointer;
+    padding:1.6% 3.2%;
+    z-index:5;
+    background: rgba(0,0,0,0.5);
+    border-radius: 999px;
+    backdrop-filter: blur(2px);
+  }
+  .back-btn .arrow {
+    font-size:4.6vw;
+    line-height:1;
+  }
+  .back-btn.lower { top:9%; }
+
+  /* zona invisível de voltar, sobre a seta já desenhada na arte (Ficha Técnica) */
+  .back-zone-invisible {
+    position:absolute;
+    top:2%;
+    left:0%;
+    width:14%;
+    height:6%;
+    cursor:pointer;
+    z-index:5;
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="phone" id="phone">
+
+    <!-- TELA DE BLOQUEIO -->
+    <div class="screen active" id="screen-lock">
+      <img src="img/lock.png" alt="Tela de bloqueio">
+      <div class="clock-wrap">
+        <div class="clock-time" id="clock-time">--:--</div>
+        <div class="clock-date" id="clock-date">--</div>
+      </div>
+      <div class="unlock-zone" id="unlock-zone"></div>
+    </div>
+
+    <!-- TELA DE MENU -->
+    <div class="screen" id="screen-menu">
+      <img src="img/menu.png" alt="Tela de menu">
+      <div class="app-zone row1 c1" data-target="screen-sinopse"></div>
+      <div class="app-zone row1 c2" data-target="screen-elenco"></div>
+      <div class="app-zone row1 c3" data-target="screen-ficha"></div>
+      <div class="app-zone row1 c4" data-target="screen-encenador"></div>
+      <div class="app-zone row2 c1" data-target="screen-equipe"></div>
+      <div class="app-zone row2 c2" data-target="screen-cia"></div>
+      <div class="app-zone row2 c3" data-target="screen-paravoce"></div>
+    </div>
+
+    <!-- APP: SINOPSE -->
+    <div class="screen" id="screen-sinopse">
+      <img src="img/app-sinopse.png" alt="Sinopse">
+      <div class="back-btn" data-back="screen-menu"><span class="arrow">‹</span> Voltar</div>
+    </div>
+
+    <!-- APP: ELENCO -->
+    <div class="screen" id="screen-elenco">
+      <img src="img/app-elenco.png" alt="Elenco">
+      <div class="back-btn" data-back="screen-menu"><span class="arrow">‹</span> Voltar</div>
+    </div>
+
+    <!-- APP: FICHA TÉCNICA (já tem seta "<" desenhada na arte) -->
+    <div class="screen" id="screen-ficha">
+      <img src="img/app-ficha-tecnica.png" alt="Ficha Técnica">
+      <div class="back-zone-invisible" data-back="screen-menu"></div>
+    </div>
+
+    <!-- APP: ENCENADOR -->
+    <div class="screen" id="screen-encenador">
+      <img src="img/app-encenador.png" alt="Encenador">
+      <div class="back-btn" data-back="screen-menu"><span class="arrow">‹</span> Voltar</div>
+    </div>
+
+    <!-- APP: EQUIPE CRIATIVA -->
+    <div class="screen" id="screen-equipe">
+      <img src="img/app-equipe.png" alt="Equipe Criativa">
+      <div class="back-btn lower" data-back="screen-menu"><span class="arrow">‹</span> Voltar</div>
+    </div>
+
+    <!-- APP: A CIA DA ENT -->
+    <div class="screen" id="screen-cia">
+      <img src="img/app-cia-ent.png" alt="A CIA da ENT">
+      <div class="back-btn lower" data-back="screen-menu"><span class="arrow">‹</span> Voltar</div>
+    </div>
+
+    <!-- APP: PARA VOCÊ -->
+    <div class="screen" id="screen-paravoce">
+      <img src="img/app-para-voce.png" alt="Para você">
+      <div class="back-btn lower" data-back="screen-menu"><span class="arrow">‹</span> Voltar</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  // Navegação: ir para o menu (clique ou swipe up na zona de desbloqueio)
+  const unlockZone = document.getElementById('unlock-zone');
+  unlockZone.addEventListener('click', () => showScreen('screen-menu'));
+
+  let touchStartY = null;
+  unlockZone.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; }, {passive:true});
+  unlockZone.addEventListener('touchend', e => {
+    if (touchStartY !== null) {
+      const diff = touchStartY - e.changedTouches[0].clientY;
+      if (diff > 30) showScreen('screen-menu'); // arrastou para cima
+    }
+    touchStartY = null;
+  }, {passive:true});
+
+  // Navegação: abrir apps
+  document.querySelectorAll('.app-zone').forEach(zone => {
+    zone.addEventListener('click', () => showScreen(zone.dataset.target));
+  });
+
+  // Navegação: voltar ao menu (botões visíveis e zona invisível)
+  document.querySelectorAll('[data-back]').forEach(btn => {
+    btn.addEventListener('click', () => showScreen(btn.dataset.back));
+  });
+
+  // Relógio - horário de Brasília, atualizado a cada segundo
+  function updateClock() {
+    const now = new Date();
+    const timeFmt = new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    const dateFmt = new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long'
+    });
+    document.getElementById('clock-time').textContent = timeFmt.format(now);
+    document.getElementById('clock-date').textContent = dateFmt.format(now);
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // Evita comportamento de scroll/bounce em mobile
+  document.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+  }, { passive: false });
+</script>
+
+</body>
+</html>
