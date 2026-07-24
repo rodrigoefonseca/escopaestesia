@@ -130,7 +130,7 @@
   }
   .back-btn.lower { top:9%; }
 
-  /* zona invisível de voltar, sobre a seta já desenhada na arte (Ficha Técnica) */
+  /* zona invisível de voltar, sobre a seta já desenhada na arte (caso exista) */
   .back-zone-invisible {
     position:absolute;
     top:2%;
@@ -139,6 +139,34 @@
     height:6%;
     cursor:pointer;
     z-index:5;
+  }
+
+  /* ---- Tela com rolagem interna + barra fixa embaixo (Ficha Técnica) ---- */
+  .scroll-area {
+    position:absolute;
+    inset:0;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .scroll-area img {
+    width:100%;
+    display:block;
+  }
+  /* espaço reservado no fim do conteúdo rolável, do tamanho da barra fixa, pra nada ficar escondido atrás dela */
+  .scroll-spacer {
+    width:100%;
+    padding-bottom:11.68%; /* proporção da barra fixa (89/762) */
+  }
+  .fixed-bottom-bar {
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:100%;
+    z-index:4;
+  }
+  .fixed-bottom-bar img {
+    width:100%;
+    display:block;
   }
 </style>
 </head>
@@ -181,10 +209,16 @@
       <div class="back-btn" data-back="screen-menu"><span class="arrow">‹</span> Voltar</div>
     </div>
 
-    <!-- APP: FICHA TÉCNICA (já tem seta "<" desenhada na arte) -->
+    <!-- APP: FICHA TÉCNICA (rolagem interna + barra fixa embaixo) -->
     <div class="screen" id="screen-ficha">
-      <img src="img/app-ficha-tecnica.png" alt="Ficha Técnica">
-      <div class="back-zone-invisible" data-back="screen-menu"></div>
+      <div class="scroll-area">
+        <img src="img/app-ficha-tecnica.png" alt="Ficha Técnica">
+        <div class="scroll-spacer"></div>
+      </div>
+      <div class="fixed-bottom-bar">
+        <img src="img/app-ficha-tecnica-bottom.png" alt="">
+      </div>
+      <div class="back-btn" data-back="screen-menu"><span class="arrow">‹</span> Voltar</div>
     </div>
 
     <!-- APP: ENCENADOR -->
